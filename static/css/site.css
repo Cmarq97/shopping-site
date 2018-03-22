@@ -41,3 +41,9 @@ div.melon-summary .price {
   margin: 5em auto 0 auto;  /* TRBL */
 }
 
+/* empty cart pug */
+
+.pug {
+    width: 480px;
+    margin: 0 auto;
+}

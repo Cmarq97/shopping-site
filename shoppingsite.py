@@ -59,25 +59,20 @@ def show_shopping_cart():
     """Display conte # - check if a "cart" exists in the session, and create one (an empty
     #   dictionary keyed to the string "cart") if notnt of shopping cart."""
 
-    # TODO: Display the contents of the shopping cart.
+    melon_list = []
+    order_total = 0
+    if "cart" in session:
+        cart = session["cart"]
+        for melon_id, qty in cart.items():
+            melon = melons.get_by_id(melon_id)
+            melon.qty = qty
+            melon.total = melon.price * qty
+            order_total = order_total + melon.total
+            melon_list.append(melon)
+    else:
+        flash("Your cart is empty!")
 
-    # The logic here will be something like:
-    #
-    # - get the cart dictionary from the session
-    # - create a list to hold melon objects and a variable to hold the total
-    #   cost of the order
-    # - loop over the cart dictionary, and for each melon id:
-    #    - get the corresponding Melon object
-    #    - compute the total cost for that type of melon
-    #    - add this to the order total
-    #    - add quantity and total cost as attributes on the Melon object
-    #    - add the Melon object to the list created above
-    # - pass the total order cost and the list of Melon objects to the template
-    #
-    # Make sure your function can also handle the case wherein no cart has
-    # been added to the session
-
-    return render_template("cart.html")
+    return render_template("cart.html", melons=melon_list, order_total=order_total)
 
 
 @app.route("/add_to_cart/<melon_id>")
@@ -92,7 +87,6 @@ def add_to_cart(melon_id):
     cart[melon_id] = cart.get(melon_id, 0) + 1
     flash("{} was successfully added to your cart!".format(
         melons.get_by_id(melon_id).common_name))
-    print cart
     return redirect("/cart")
 
 
@@ -138,6 +132,11 @@ def checkout():
     flash("Sorry! Checkout will be implemented in a future version.")
     return redirect("/melons")
 
+
+@app.errorhandler(404)
+def page_not_found(e):
+    flash("404 Error: Melon not found!")
+    return render_template('404.html'), 404
 
 if __name__ == "__main__":
     app.run(debug=True)
