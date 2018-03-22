@@ -6,10 +6,12 @@ put melons in a shopping cart.
 Authors: Joel Burton, Christian Fernandez, Meggie Mahnken, Katie Byers.
 """
 
-from flask import Flask, render_template, redirect, flash, session
+from flask import Flask, request, render_template, redirect, flash, session
+#from flask_debugtoolbar import DebugToolbarExtension
 import jinja2
 
 import melons
+import customers
 
 app = Flask(__name__)
 
@@ -105,21 +107,31 @@ def process_login():
     dictionary, look up the user, and store them in the session.
     """
 
-    # TODO: Need to implement this!
+    email = request.form.get("email")
+    password = request.form.get("password")
 
-    # The logic here should be something like:
-    #
-    # - get user-provided name and password from request.form
-    # - use customers.get_by_email() to retrieve corresponding Customer
-    #   object (if any)
-    # - if a Customer with that email was found, check the provided password
-    #   against the stored one
-    # - if they match, store the user's email in the session, flash a success
-    #   message and redirect the user to the "/melons" route
-    # - if they don't, flash a failure message and redirect back to "/login"
-    # - do the same if a Customer with that email doesn't exist
+    customer = customers.get_by_email(email)
+    if customer is not None:
+        if customer.is_correct_password(password):
+            session["email"] = email
+            flash("Login Successful!")
+            return redirect("/melons")
+        else:
+            flash("Incorrect Password")
+            return redirect("/login")
+    else:
+        flash("User Does Not Exist")
+        return redirect("/login")
 
-    return "Oops! This needs to be implemented"
+
+@app.route("/logout")
+def process_logout():
+    """ Logs user out of site."""
+
+    del session["email"]
+    flash("Logout Successful")
+
+    return redirect("/melons")
 
 
 @app.route("/checkout")
@@ -139,4 +151,6 @@ def page_not_found(e):
     return render_template('404.html'), 404
 
 if __name__ == "__main__":
-    app.run(debug=True)
+#     app.debug = True
+#     DebugToolbarExtension(app)
+    app.run()
