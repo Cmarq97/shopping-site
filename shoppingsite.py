@@ -51,7 +51,6 @@ def show_melon(melon_id):
     """
 
     melon = melons.get_by_id(melon_id)
-    print melon
     return render_template("melon_details.html",
                            display_melon=melon)
 
@@ -132,6 +131,14 @@ def process_logout():
     flash("Logout Successful")
 
     return redirect("/melons")
+
+
+@app.route("/clear")
+def clear_cart():
+    """Clear the user's shopping cart"""
+
+    del session["cart"]
+    return redirect("/cart")
 
 
 @app.route("/checkout")
